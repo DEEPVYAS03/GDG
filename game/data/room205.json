@@ -1,0 +1,17 @@
+{	
+	"worldBounds" : {"x" : 1200, "y" : 600},
+	"backgroundData" : "hrOffice",
+	"obstacleData" : [ 
+	],
+
+	"doorData" : [
+
+		{"name" : "door205", "leadsTo" : "level2", "xPos" : 600, "yPos" : 324, "frame" : "darkDoor", "spawnAtx" : 4192, "keyRequired": "none"}
+	],
+	"enemyData" : [],
+	"keyCardData" : [],
+	"noteData" : [
+		{"name" : "note12", "leadsTo" : "complaint", "xPos" : 945, "yPos" : 350, "frame" : "complaint"}
+	]
+
+}

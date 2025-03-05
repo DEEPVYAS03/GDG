@@ -1,0 +1,20 @@
+{	
+	"worldBounds" : {"x" : 1200, "y" : 600},
+	"backgroundData" : "daughterRoom",
+	"obstacleData" : [ 
+	],
+
+	"doorData" : [
+
+		{"name" : "door105", "leadsTo" : "level3", "xPos" : 160, "yPos" : 324, "frame" : "darkDoor", "spawnAtx" : 2655, "keyRequired": "none"}
+	],
+	"enemyData" : [],
+	"keyCardData" : [],
+	"noteData" : [
+		{"name" : "stephanyFile", "leadsTo" : "stephanyFile", "xPos" : 883, "yPos" : 360, "frame" : "stephanyFile"},
+		{"name" : "bills", "leadsTo" : "bills", "xPos" : 263, "yPos" : 360, "frame" : "bills"}
+
+	]
+
+}
+
