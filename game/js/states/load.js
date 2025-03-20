@@ -7,7 +7,7 @@ var load = {
 		game.load.image('grass', 'platform.png');
 
 		// background
-		game.load.image('title', 'titleScreen.png');
+		game.load.image('title', 'titleScreen2.png');
 		game.load.image('controls', 'Controls.png');
 		game.load.image('hallRoomSprite', 'HallOne.jpg');
 		game.load.image('startRoomSprite', 'Level01.jpg');
@@ -40,7 +40,7 @@ var load = {
 
 
 		//title screen
-		game.load.image('title', 'titleScreen.png');
+		game.load.image('title', 'titleScreen2.png');
 		game.load.image('playButton', 'playButton.png');
 		game.load.image('menuButton', 'menuButton.png');
 		game.load.image('controlsScreen', 'Controls.png');
