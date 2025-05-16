@@ -185,16 +185,15 @@ var playState = {
 		game.physics.arcade.collide(keyCardGroup, [obstacleGroup, platforms, obstacleHideGroup]);
 
 		// spawn 'E' when you approach interactable object or door
-		// noteGroup.forEach( function(c) {
-		// 	if (((c.body.position.x - player.body.position.x > -50 && c.body.position.x - player.body.position.x < 0 ) || (c.body.position.x - player.body.position.x < 50 && c.body.position.x - player.body.position.x > 0 )) && c.poppingUp == false) {
-		// 		c.popup = game.add.sprite( c.body.position.x + 10, c.body.position.y - 20, 'interactableE');
-		// 		c.poppingUp = true;
-		// 	} else if (!((c.body.position.x - player.body.position.x > -80 && c.body.position.x - player.body.position.x < 0 ) || (c.body.position.x - player.body.position.x < 80 && c.body.position.x - player.body.position.x > 0 )) && c.poppingUp == true) {
-		// 		c.popup.kill();
-		// 		c.poppingUp = false;
-		// 	} 
-		// });
-		
+		noteGroup.forEach( function(c) {
+			if (((c.body.position.x - player.body.position.x > -50 && c.body.position.x - player.body.position.x < 0 ) || (c.body.position.x - player.body.position.x < 50 && c.body.position.x - player.body.position.x > 0 )) && c.poppingUp == false) {
+				c.popup = game.add.sprite( c.body.position.x + 10, c.body.position.y - 20, 'interactableE');
+				c.poppingUp = true;
+			} else if (!((c.body.position.x - player.body.position.x > -80 && c.body.position.x - player.body.position.x < 0 ) || (c.body.position.x - player.body.position.x < 80 && c.body.position.x - player.body.position.x > 0 )) && c.poppingUp == true) {
+				c.popup.kill();
+				c.poppingUp = false;
+			} 
+		});
 		doorGroup.forEach( function(c) {
 			if (((c.body.position.x - player.body.position.x > -50 && c.body.position.x - player.body.position.x < 0 ) || (c.body.position.x - player.body.position.x < 50 && c.body.position.x - player.body.position.x > 0 )) && c.poppingUp == false) {
 				c.popup = game.add.sprite( c.body.position.x + c.body.width/2 -20, c.body.position.y - 30, 'interactableE');
@@ -661,53 +660,145 @@ var playState = {
 	},
 	interact: function(){
 		var doorEntering;
-	
-		if(foreground == true){
-			for(var i = 0; i < doorGroup.children.length; i++) {
-				doorEntering = doorGroup.children[i];
-	
-				// Only allow interaction with doors, ignore notes and other objects
-				if(game.physics.arcade.overlap(player, doorEntering) && inventory.indexOf(doorEntering.keyRequired) > -1 ){
-					console.log('now entering: ' + doorEntering.name);
-	
-					if(canMove == true) {
-						// Show "Game is under development" message
-						var overlay = game.add.graphics(0, 0);
-						overlay.beginFill(0x000000, 0.7); // Black with 70% opacity
-						overlay.drawRect(0, 0, game.width, game.height);
-						overlay.endFill();
-						overlay.fixedToCamera = true;
-	
-						var message = game.add.text(game.camera.x + game.width / 2, game.camera.y + game.height / 2, 
-							"Game is under development", {
-							font: "50px Arial",
-							fill: "#ffffff",
-							align: "center",
-							stroke: "#ff0000",
-							strokeThickness: 6
-						});
-						message.anchor.setTo(0.5, 0.5);
-						message.fixedToCamera = true;
-	
-						// Play door sound for interaction feedback
-						doorSound.play();
-	
-						// Fade out the message after 2.5 seconds
-						game.time.events.add(2500, function() {
-							game.add.tween(overlay).to({ alpha: 0 }, 1000, Phaser.Easing.Linear.None, true);
-							game.add.tween(message).to({ alpha: 0 }, 1000, Phaser.Easing.Linear.None, true);
-						}, this);
+		var noteReading;
+		for(var i = 0; i < noteGroup.children.length; i++){
+			noteReading = noteGroup.children[i];
+			//if player is overlaping with the noteGroup
+			if(game.physics.arcade.overlap(player, noteReading)){
+				if(canMove == true){	
+					if(noteReading.name == 'random patient') {
+						read = game.add.sprite(noteReading.position.x - 240, noteReading.position.y - 150, 'speech bubble');
+						read.scale.x = 0.3;
+						read.scale.y = 0.3;
+						player.body.velocity.x = 0;
+						player.body.velocity.y = 0;
+						canMove = false;
+					} else {
+						//Add the blown up version of the sprite on screen and stop player from moving
+						pageTurnSound.play();
+						read = game.add.sprite(50, -50, noteReading.leadsTo);
+						read.scale.x = 0.8;
+						read.scale.y = 0.8;
+						read.alpha = 1;
+						read.fixedToCamera = true;
+						player.body.velocity.x = 0;
+						player.body.velocity.y = 0;
+						canMove = false;
+						topLayer.add(read);
+						if (noteReading.name == 'text message') {
+							read.scale.x = 0.3;
+							read.scale.y = 0.3;
+						}
 					}
-					break;
-				} 
-				else if (game.physics.arcade.overlap(player, doorEntering) && inventory.indexOf(doorEntering.keyRequired) <= -1 && canMove == true){
-					doorLockedSound.play();
+					
+				}
+				else{
+					//Destroy the blown up version of the sprite on screen and allow player to move again
+					read.destroy();
+					canMove = true;
+					console.log('destroy');
 				}
 			}
 		}
-	}
-,	
+		if(foreground == true){
+			for(var i = 0; i < doorGroup.children.length; i++) {
+			
+				doorEntering = doorGroup.children[i];
+				// only enter the door if the key exists in your inventory
+				if(game.physics.arcade.overlap(player, doorEntering) && inventory.indexOf(doorEntering.keyRequired) > -1 ){
+					console.log('now entering: ' + doorEntering.name);
+					if (doorEntering.name == 'elevator' && elevatorOpen == false && canMove == true) {
+						console.log('show elevator');
+						elevatorOpen = true;
+						canMove = false;
+						elevatorBackground = game.add.sprite(100, 20, 'elevatorAtlas', 'elevatorPanel');
+						elevatorString = '';
+						elevatorText = game.add.text(175, 193, elevatorString);
+						button1 = game.add.button(145, 325, 'elevatorAtlas', function() { buttonPressSound.play(); if(elevatorString == "Invalid") { elevatorString = '';} if(elevatorString.length < 4) {elevatorString += '1'; elevatorText.setText(elevatorString);} } , this, 'button1', 'button1');
+						button2 = game.add.button(225, 325, 'elevatorAtlas', function() { buttonPressSound.play(); if(elevatorString == "Invalid") { elevatorString = '';} if(elevatorString.length < 4) {elevatorString += '2'; elevatorText.setText(elevatorString);} } , this, 'button2', 'button2');
+						button3 = game.add.button(305, 325, 'elevatorAtlas', function() { buttonPressSound.play(); if(elevatorString == "Invalid") { elevatorString = '';} if(elevatorString.length < 4) {elevatorString += '3'; elevatorText.setText(elevatorString);} } , this, 'button3', 'button3');
+						button4 = game.add.button(145, 380, 'elevatorAtlas', function() { buttonPressSound.play(); if(elevatorString == "Invalid") { elevatorString = '';} if(elevatorString.length < 4) {elevatorString += '4'; elevatorText.setText(elevatorString);} } , this, 'button4', 'button4');
+						button5 = game.add.button(225, 380, 'elevatorAtlas', function() { buttonPressSound.play(); if(elevatorString == "Invalid") { elevatorString = '';} if(elevatorString.length < 4) {elevatorString += '5'; elevatorText.setText(elevatorString);} } , this, 'button5', 'button5');
+						button6 = game.add.button(305, 380, 'elevatorAtlas', function() { buttonPressSound.play(); if(elevatorString == "Invalid") { elevatorString = '';} if(elevatorString.length < 4) {elevatorString += '6'; elevatorText.setText(elevatorString);} } , this, 'button6', 'button6');
+						button7 = game.add.button(145, 435, 'elevatorAtlas', function() { buttonPressSound.play(); if(elevatorString == "Invalid") { elevatorString = '';} if(elevatorString.length < 4) {elevatorString += '7'; elevatorText.setText(elevatorString);} } , this, 'button7', 'button7');
+						button8 = game.add.button(225, 435, 'elevatorAtlas', function() { buttonPressSound.play(); if(elevatorString == "Invalid") { elevatorString = '';} if(elevatorString.length < 4) {elevatorString += '8'; elevatorText.setText(elevatorString);} } , this, 'button8', 'button8');
+						button9 = game.add.button(305, 435, 'elevatorAtlas', function() { buttonPressSound.play(); if(elevatorString == "Invalid") { elevatorString = '';} if(elevatorString.length < 4) {elevatorString += '9'; elevatorText.setText(elevatorString);} } , this, 'button9', 'button9');
+						button0 = game.add.button(225, 490, 'elevatorAtlas', function() { buttonPressSound.play(); if(elevatorString == "Invalid") { elevatorString = '';} if(elevatorString.length < 4) {elevatorString += '0'; elevatorText.setText(elevatorString);} } , this, 'button0', 'button0');
+						buttonEnter = game.add.button(305, 490, 'elevatorAtlas', 
+							function() { 
+								buttonPressSound.play(); 
+								// if the code entered matches properly, generate level and close panel
+								var shouldDestroy = false;
+								if(elevatorString == '1379') {playerSpawnX = 621; generateLevel('level3'); shouldDestroy = true;} 
+								else if(elevatorString == '2821') {playerSpawnX = 621; generateLevel('level2'); shouldDestroy = true;}
+								else if(elevatorString == '3462') {playerSpawnX = 621; generateLevel('level1'); shouldDestroy = true;}
+								else if(elevatorString == '0117') {playerSpawnX = 214; generateLevel('morgueFloor'); shouldDestroy = true;}
+								else if (elevatorString == '0379') {playerSpawnX = 214; generateLevel('receptionFloor'); shouldDestroy = true;}
+								else {elevatorString = 'Invalid'}
+								if (shouldDestroy == true) {
+									elevatorBackground.destroy();
+									button1.destroy();
+									button2.destroy();
+									button3.destroy();
+									button4.destroy();
+									button5.destroy();
+									button6.destroy();
+									button7.destroy();
+									button8.destroy();
+									button9.destroy();
+									button0.destroy();
+									buttonEnter.destroy();
+									elevatorText.destroy();
+									elevatorOpen = false;
+									canMove = true;
+								}
+								elevatorText.setText(elevatorString);
+							}, this, 'buttonEnt', 'buttonEnt');
 
+					} else if (doorEntering.name == 'elevator' && elevatorOpen == true) {
+						console.log('kill elevator');
+						console.log(canMove);
+						elevatorBackground.destroy();
+						button1.destroy();
+						button2.destroy();
+						button3.destroy();
+						button4.destroy();
+						button5.destroy();
+						button6.destroy();
+						button7.destroy();
+						button8.destroy();
+						button9.destroy();
+						button0.destroy();
+						buttonEnter.destroy();
+						elevatorText.destroy();
+						canMove = true;
+						elevatorOpen = false;
+					} else if (doorEntering.name == 'creepyDoor' && doorWasOpened == false ) {
+						console.log('open creepy');		
+						creepyDoor.animations.play('open door');
+						doorWasOpened = true;
+					}  else if (doorEntering.name == 'creepyDoor' && doorWasOpened == true ){
+						console.log('open  empty creepy');
+						creepyDoor.animations.play('empty open door');
+					} else {
+						if(canMove == true){
+							playerSpawnX = doorEntering.spawnAtx; // set appropriate place to spawn
+							//play door audio
+							doorSound.play();
+							this.generateLevel(doorEntering.leadsTo);
+						
+							console.log(doorEntering.leadsTo);
+						}
+					}
+					break;
+				} else {
+					if(game.physics.arcade.overlap(player, doorEntering) && inventory.indexOf(doorEntering.keyRequired) <= -1 && canMove == true){
+						doorLockedSound.play();
+					}
+				}
+			}
+		}
+	},
 	inventory: function() {
 		if (!inventoryOpen) {
 			canMove = false;
